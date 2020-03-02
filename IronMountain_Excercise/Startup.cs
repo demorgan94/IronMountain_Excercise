@@ -1,7 +1,10 @@
+using IronMountain_Excercise.Data;
+using IronMountain_Excercise.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +29,13 @@ namespace IronMountain_Excercise
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+
+            services.AddDbContext<AppDBContext>(options =>
+            {
+                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddScoped<IProcessImagesService, ProcessImagesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
