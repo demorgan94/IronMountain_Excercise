@@ -26,8 +26,10 @@ export class HomeComponent {
 
     this._uploadImagesService.uploadImages(formData).subscribe(res => {
       this.message = "Image(s) Uploaded Successfully";
+      console.log(res);
     }, err => {
       this.message = "Error Uploading Image(s)";
+      console.log(err);
     });
   }
 }

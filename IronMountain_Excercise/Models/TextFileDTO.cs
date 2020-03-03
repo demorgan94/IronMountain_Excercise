@@ -4,7 +4,7 @@ using System.IO;
 
 namespace IronMountain_Excercise.Models
 {
-    public class TextFile
+    public class TextFileDTO
     {
         [Key]
         public int Id { get; set; }

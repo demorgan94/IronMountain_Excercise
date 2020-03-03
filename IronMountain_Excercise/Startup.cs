@@ -30,7 +30,7 @@ namespace IronMountain_Excercise
                 configuration.RootPath = "ClientApp/dist";
             });
 
-            services.AddDbContext<AppDBContext>(options =>
+            services.AddDbContextPool<AppDBContext>(options =>
             {
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
@@ -52,7 +52,6 @@ namespace IronMountain_Excercise
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {

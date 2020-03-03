@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http'
+import { HttpClient } from '@angular/common/http';
+import { saveAs } from 'file-saver';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class UploadImagesService {
 
   constructor(private _http: HttpClient) { }
 
-  uploadImages(images: FormData): Observable<any> {
+  uploadImages(images: FormData) {
     return this._http.post(this.uploadImagesUrl, images);
   }
 

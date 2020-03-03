@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using IronMountain_Excercise.Services;
 using Microsoft.AspNetCore.Http;
@@ -31,14 +33,21 @@ namespace IronMountain_Excercise.Controllers
                 images.Add(files[i]);
             }
 
-
-            if (images == null) return BadRequest("No Image(s)");
+            if (images == null) return NoContent();
             if (images.Count == 0)
             {
-                return BadRequest("Empty Image(s)");
+                return BadRequest();
             }
 
-            return _processImagesService.ProcessImages(images);
+            _processImagesService.ProcessImages(images);
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("download")]
+        public IActionResult DownloadZip(byte[] zipFile)
+        {
+            return File(zipFile, "application/zip", DateTime.Now.DayOfWeek.ToString() + "_" + new Guid());
         }
 
         [HttpPost]
