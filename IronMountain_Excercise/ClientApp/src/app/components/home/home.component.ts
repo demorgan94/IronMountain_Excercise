@@ -35,6 +35,6 @@ export class HomeComponent {
   }
 
   downloadZip() {
-    console.log("asd")
+    
   }
 }
