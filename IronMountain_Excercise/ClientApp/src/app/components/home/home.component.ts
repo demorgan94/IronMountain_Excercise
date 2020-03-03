@@ -8,6 +8,7 @@ import { UploadImagesService } from 'src/app/services/upload-images.service';
 export class HomeComponent {
   fileData: File[];
   message: string = "Choose Image(s)";
+  buttonFlag: boolean;
 
   constructor(private _uploadImagesService: UploadImagesService) { }
 
@@ -26,10 +27,14 @@ export class HomeComponent {
 
     this._uploadImagesService.uploadImages(formData).subscribe(res => {
       this.message = "Image(s) Uploaded Successfully";
-      console.log(res);
+      this.buttonFlag = true;
     }, err => {
       this.message = "Error Uploading Image(s)";
-      console.log(err);
+      this.buttonFlag = false;
     });
+  }
+
+  downloadZip() {
+    console.log("asd")
   }
 }

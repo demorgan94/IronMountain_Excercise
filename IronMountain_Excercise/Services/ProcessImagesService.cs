@@ -15,9 +15,9 @@ namespace IronMountain_Excercise.Services
 {
     public interface IProcessImagesService
     {
-        byte[] ProcessImages(List<IFormFile> filesData);
+        string ProcessImages(List<IFormFile> filesData);
         void ProcessZipFile(IFormFile zipDat);
-        //FileContentResult DownloadZip(byte[] zipFile);
+        FileContentResult DownloadZip();
     }
 
     public class ProcessImagesService : IProcessImagesService
@@ -31,22 +31,25 @@ namespace IronMountain_Excercise.Services
             _context = context;
         }
 
-        //public FileContentResult DownloadZip(byte[] zipFile)
-        //{
-        //    return new FileContentResult(zipFile, new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("application/octet"))
-        //    {
-        //        FileDownloadName = DateTime.Now.DayOfWeek.ToString()
-        //    };
-        //}
-
-        public byte[] ProcessImages(List<IFormFile> filesData)
+        public FileContentResult DownloadZip()
         {
-            var uploadFilesPath = Path.Combine("Uploads", DateTime.Now.DayOfWeek.ToString());
+            return null;
+            //return new FileContentResult(zipFile, new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("application/octet"))
+            //{
+            //    FileDownloadName = DateTime.Now.DayOfWeek.ToString()
+            //};
+        }
+
+        public string ProcessImages(List<IFormFile> filesData)
+        {
+            var formatedDateZip = DateTime.ParseExact(DateTime.Now.ToString(), "yyyy_MM_dd_hh_mm_ss", System.Globalization.CultureInfo.InvariantCulture);
+            var uploadFilesPath = Path.Combine("Uploads", formatedDateZip.ToString());
             var zipFile = uploadFilesPath + ".zip";
+            var metaFile = uploadFilesPath + ".meta";
 
             if (File.Exists(uploadFilesPath)) { File.Delete(uploadFilesPath); }
-
             if (File.Exists(zipFile)) { File.Delete(zipFile); }
+            if (File.Exists(metaFile)) { File.Delete(metaFile); }
 
             if (!Directory.Exists(uploadFilesPath)) { Directory.CreateDirectory(uploadFilesPath); }
 
@@ -76,14 +79,19 @@ namespace IronMountain_Excercise.Services
                         Content = contentToString
                     };
 
+                    using (StreamWriter sw = File.AppendText(metaFile))
+                    {
+                        sw.WriteLine("\tID\t\t" + "|\tCreation Date\t|" + "\t\t\t\tImage Path\t");
+                        sw.WriteLine($"{julianDate}\t" + $"|{DateTime.Now}|" + $"\t{filePath}\t");
+                    }
+
                     _context.Add(image);
                     _context.SaveChanges();
                 }
 
                 ZipFile.CreateFromDirectory(uploadFilesPath, zipFile);
-                var readZip = File.ReadAllBytes(zipFile);
 
-                return readZip;
+                return zipFile;
             }
             else
             {

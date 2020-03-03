@@ -10,6 +10,7 @@ export class UploadImagesService {
   apiUrl = '/api/ProcessImage';
   uploadImagesUrl = this.apiUrl + '/images';
   uploadZipUrl = this.apiUrl + '/zip';
+  downloadZipUrl = this.apiUrl + '/download';
 
   constructor(private _http: HttpClient) { }
 
@@ -19,5 +20,9 @@ export class UploadImagesService {
 
   uploadZip(zip: FormData): Observable<any> {
     return this._http.post(this.uploadZipUrl, zip);
+  }
+
+  downloadZip(): Observable<any> {
+    return this._http.get(this.downloadZipUrl);
   }
 }
