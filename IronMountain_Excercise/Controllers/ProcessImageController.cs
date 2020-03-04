@@ -44,10 +44,10 @@ namespace IronMountain_Excercise.Controllers
         }
 
         [HttpPost("download")]
-        public IActionResult DownloadZip(List<ImageFile> imagesList)
+        public FileContentResult DownloadZip(List<ImageFile> imagesList)
         {
-            _processImagesService.DownloadZip(imagesList);
-            return Ok();
+            byte[] zipFile = _processImagesService.DownloadZip(imagesList);
+            return File(zipFile, "application/zip", DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss"));
         }
     }
 }

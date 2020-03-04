@@ -32,7 +32,7 @@ namespace IronMountain_Excercise.Services
         {
             var formatedDateZipName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss");
             var uploadFilesPath = DateTime.Now.DayOfWeek.ToString();
-            var txtFileName = new Guid() + "_" + DateTime.Now.ToString("dd/MM/yy_hh:mm:ss") + ".meta";
+            var txtFileName = new Guid() + "_" + DateTime.Now.ToString("yyyy/MM/dd_hh:mm:ss") + ".txt";
             byte[] txtBytes = null;
             byte[] zipBytes = null;
 
@@ -46,37 +46,20 @@ namespace IronMountain_Excercise.Services
                     {
                         using (var txtStream = new MemoryStream())
                         {
-                            var writer = new StreamWriter(txtStream);
+                            TextWriter writer = new StreamWriter(txtStream);
                             writer.WriteLine("\tID\t\t" + "|\tCreation Date\t|" + "\t\t\t\tImage Path\t");
                             writer.WriteLine($"{image.Id}\t" + $"|{DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")}|" + $"\t{image.FileName}\t");
-
-                            using (var ms = new MemoryStream())
-                            {
-                                using (var resStream = new FileStream(Path.Combine(Path.GetTempPath(), uploadFilesPath), FileMode.Open, FileAccess.Read))
-                                {
-                                    ms.CopyTo(resStream);
-                                    txtBytes = ms.ToArray();
-                                }
-                            }
+                            writer.Flush();
+                            txtBytes = txtStream.ToArray();
                         }
 
-                        using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
+                        using (var zip = new ZipArchive(stream, ZipArchiveMode.Update, true))
                         {
                             var zipEntry = zip.CreateEntry(image.FileName, CompressionLevel.Fastest);
 
                             using (var zipStream = zipEntry.Open())
                             {
-                                zipStream.Write(Convert.FromBase64String(image.Content), 0, image.Content.Length);
-                            }
-
-                            zipEntry = zip.CreateEntry(txtFileName, CompressionLevel.Fastest);
-
-                            if (zip.GetEntry(txtFileName).ToString() != txtFileName)
-                            {
-                                using (var zipStream = zipEntry.Open())
-                                {
-                                    zipStream.Write(txtBytes, 0, txtBytes.Length);
-                                }
+                                zipStream.Write(Convert.FromBase64String(image.Content));
                             }
                         }
                     }
