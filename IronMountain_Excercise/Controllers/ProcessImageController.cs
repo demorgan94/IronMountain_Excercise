@@ -46,7 +46,8 @@ namespace IronMountain_Excercise.Controllers
         [HttpPost("download")]
         public IActionResult DownloadZip(List<ImageFile> imagesList)
         {
-            return null;
+            _processImagesService.DownloadZip(imagesList);
+            return Ok();
         }
     }
 }

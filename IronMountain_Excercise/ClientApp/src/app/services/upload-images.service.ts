@@ -8,15 +8,17 @@ import { Image } from '../models/image.model';
   providedIn: 'root'
 })
 export class UploadImagesService {
-  apiUrl = '/api/ProcessImage';
+  apiUrl = '/api/ProcessImage/';
+  uploadUrl = this.apiUrl + "upload";
+  downloadUrl = this.apiUrl + "download";
 
   constructor(private _http: HttpClient) { }
 
   uploadImages(images: FormData): Observable<any> {
-    return this._http.post(this.apiUrl, images);
+    return this._http.post(this.uploadUrl, images);
   }
 
   downloadZip(imagesList: Image[]): Observable<any> {
-    return this._http.post(this.apiUrl, imagesList);
+    return this._http.post(this.downloadUrl, imagesList);
   }
 }

@@ -1,5 +1,4 @@
 using System;
-using IronMountain_Excercise.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace IronMountain_Excercise.Data
