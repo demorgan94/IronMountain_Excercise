@@ -1,28 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { saveAs } from 'file-saver';
+import { Image } from '../models/image.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UploadImagesService {
   apiUrl = '/api/ProcessImage';
-  uploadImagesUrl = this.apiUrl + '/images';
-  uploadZipUrl = this.apiUrl + '/zip';
-  downloadZipUrl = this.apiUrl + '/download';
 
   constructor(private _http: HttpClient) { }
 
-  uploadImages(images: FormData) {
-    return this._http.post(this.uploadImagesUrl, images);
+  uploadImages(images: FormData): Observable<any> {
+    return this._http.post(this.apiUrl, images);
   }
 
-  uploadZip(zip: FormData): Observable<any> {
-    return this._http.post(this.uploadZipUrl, zip);
-  }
-
-  downloadZip(): Observable<any> {
-    return this._http.get(this.downloadZipUrl);
+  downloadZip(imagesList: Image[]): Observable<any> {
+    return this._http.post(this.apiUrl, imagesList);
   }
 }

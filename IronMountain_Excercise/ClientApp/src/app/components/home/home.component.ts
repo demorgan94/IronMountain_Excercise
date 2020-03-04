@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UploadImagesService } from 'src/app/services/upload-images.service';
+import { Image } from "src/app/models/image.model";
 
 @Component({
   selector: 'app-home',
@@ -9,6 +10,7 @@ export class HomeComponent {
   fileData: File[];
   message: string = "Choose Image(s)";
   buttonFlag: boolean;
+  imagesList: Image[];
 
   constructor(private _uploadImagesService: UploadImagesService) { }
 
@@ -28,6 +30,7 @@ export class HomeComponent {
     this._uploadImagesService.uploadImages(formData).subscribe(res => {
       this.message = "Image(s) Uploaded Successfully";
       this.buttonFlag = true;
+      this.imagesList = res;
     }, err => {
       this.message = "Error Uploading Image(s)";
       this.buttonFlag = false;
@@ -35,6 +38,10 @@ export class HomeComponent {
   }
 
   downloadZip() {
-    
+    this._uploadImagesService.downloadZip(this.imagesList).subscribe(res => {
+      console.log(res);
+    }, err => {
+      console.log(err);
+    });
   }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using IronMountain_Excercise.Models;
 using Microsoft.EntityFrameworkCore;
 

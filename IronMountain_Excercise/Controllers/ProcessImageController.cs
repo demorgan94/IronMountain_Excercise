@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using IronMountain_Excercise.Data;
 using IronMountain_Excercise.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,8 +23,7 @@ namespace IronMountain_Excercise.Controllers
             _processImagesService = processImagesService;
         }
 
-        [HttpPost]
-        [Route("images")]
+        [HttpPost("upload")]
         public IActionResult ProcessImages()
         {
             List<IFormFile> images = new List<IFormFile>();
@@ -39,32 +39,14 @@ namespace IronMountain_Excercise.Controllers
                 return BadRequest();
             }
 
-            _processImagesService.ProcessImages(images);
-            return Ok();
+            var filesList = _processImagesService.ProcessImages(images);
+            return Ok(filesList);
         }
 
-        [HttpGet]
-        [Route("download")]
-        public IActionResult DownloadZip(byte[] zipFile)
+        [HttpPost("download")]
+        public IActionResult DownloadZip(List<ImageFile> imagesList)
         {
-            return File(zipFile, "application/zip", DateTime.Now.DayOfWeek.ToString() + "_" + new Guid());
-        }
-
-        [HttpPost]
-        [Route("zip")]
-        public IActionResult ProcessZip()
-        {
-            var zip = Request.Form.Files[0];
-
-            if (zip == null) return BadRequest("No Image(s)");
-            if (zip.Length == 0)
-            {
-                return BadRequest("Empty Image(s)");
-            }
-
-            _processImagesService.ProcessZipFile(zip);
-
-            return Ok();
+            return null;
         }
     }
 }

@@ -15,93 +15,84 @@ namespace IronMountain_Excercise.Services
 {
     public interface IProcessImagesService
     {
-        string ProcessImages(List<IFormFile> filesData);
-        void ProcessZipFile(IFormFile zipDat);
-        FileContentResult DownloadZip();
+        List<ImageFile> ProcessImages(List<IFormFile> filesData);
+        FileContentResult DownloadZip(List<ImageFile> imagesIdList);
     }
 
     public class ProcessImagesService : IProcessImagesService
     {
-        private readonly IWebHostEnvironment _host;
         private readonly AppDBContext _context;
 
-        public ProcessImagesService(IWebHostEnvironment host, AppDBContext context)
+        public ProcessImagesService(AppDBContext context)
         {
-            _host = host;
             _context = context;
         }
 
-        public FileContentResult DownloadZip()
+        public FileContentResult DownloadZip(List<ImageFile> imagesList)
         {
+            var formatedDateZip = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss");
+
+            using (var stream = new MemoryStream())
+            {
+                foreach (var image in imagesList)
+                {
+                    var result = _context.ImageFiles.FirstOrDefault(x => x.Id == image.Id);
+
+                    if (result != null)
+                    {
+                        var writer = new StreamWriter(stream);
+                        writer.WriteLine("\tID\t\t" + "|\tCreation Date\t|" + "\t\t\t\tImage Path\t");
+                        writer.WriteLine($"{image.Id}\t" + $"|{DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")}|" + $"\t{image.FileName}\t");
+                        
+                        using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
+                        {
+                            var zipEntry = zip.CreateEntry(image.FileName, CompressionLevel.Fastest);   
+
+                            using (var zipStream = zipEntry.Open())
+                            {
+                                zipStream.Write(Convert.FromBase64String(image.Content), 0, image.Content.Length);
+                            }
+                        }
+                    }
+                }
+            }
+
             return null;
-            //return new FileContentResult(zipFile, new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("application/octet"))
-            //{
-            //    FileDownloadName = DateTime.Now.DayOfWeek.ToString()
-            //};
         }
 
-        public string ProcessImages(List<IFormFile> filesData)
+        public List<ImageFile> ProcessImages(List<IFormFile> filesData)
         {
-            var formatedDateZip = DateTime.ParseExact(DateTime.Now.ToString(), "yyyy_MM_dd_hh_mm_ss", System.Globalization.CultureInfo.InvariantCulture);
-            var uploadFilesPath = Path.Combine("Uploads", formatedDateZip.ToString());
-            var zipFile = uploadFilesPath + ".zip";
-            var metaFile = uploadFilesPath + ".meta";
+            List<ImageFile> imagesList = new List<ImageFile>();
 
-            if (File.Exists(uploadFilesPath)) { File.Delete(uploadFilesPath); }
-            if (File.Exists(zipFile)) { File.Delete(zipFile); }
-            if (File.Exists(metaFile)) { File.Delete(metaFile); }
-
-            if (!Directory.Exists(uploadFilesPath)) { Directory.CreateDirectory(uploadFilesPath); }
-
-            if (filesData.Count > 0)
+            foreach (var imageFile in filesData)
             {
-                for (int i = 0; i < filesData.Count; i++)
-                { 
-                    var filePath = Path.Combine(uploadFilesPath, filesData[i].FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        filesData[i].CopyTo(stream);
-                    }
+                using (var stream = new MemoryStream())
+                {
+                    imageFile.CopyTo(stream);
+                    byte[] content = stream.ToArray();
 
                     var currentDate = DateTime.Today;
                     var formatedDate = string.Format("{0}{1}", currentDate.ToString("yy"), currentDate.DayOfYear);
                     Random randomIntGenerator = new Random();
                     string randomInt = randomIntGenerator.Next(0, 99999).ToString("D5");
                     int.TryParse(formatedDate + randomInt, out int julianDate);
-                    byte[] content = File.ReadAllBytes(filePath);
-                    string contentToString = Convert.ToBase64String(content);
 
                     ImageFile image = new ImageFile
                     {
                         Id = julianDate,
                         CreationDate = DateTime.Now,
-                        FileName = filesData[i].FileName,
-                        Content = contentToString
+                        FileName = imageFile.FileName,
+                        Content = Convert.ToBase64String(content)
                     };
 
-                    using (StreamWriter sw = File.AppendText(metaFile))
-                    {
-                        sw.WriteLine("\tID\t\t" + "|\tCreation Date\t|" + "\t\t\t\tImage Path\t");
-                        sw.WriteLine($"{julianDate}\t" + $"|{DateTime.Now}|" + $"\t{filePath}\t");
-                    }
+                    imagesList.Add(image);
 
                     _context.Add(image);
                     _context.SaveChanges();
                 }
-
-                ZipFile.CreateFromDirectory(uploadFilesPath, zipFile);
-
-                return zipFile;
             }
-            else
-            {
-                return null;
-            }
-        }
 
-        public void ProcessZipFile(IFormFile zipDat)
-        {
-            throw new NotImplementedException();
+            return imagesList;
         }
     }
 }
