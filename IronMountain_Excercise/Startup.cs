@@ -30,10 +30,8 @@ namespace IronMountain_Excercise
                 configuration.RootPath = "ClientApp/dist";
             });
 
-            services.AddDbContextPool<AppDBContext>(options =>
-            {
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
-            });
+            services.AddDbContext<AppDBContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IProcessImagesService, ProcessImagesService>();
         }

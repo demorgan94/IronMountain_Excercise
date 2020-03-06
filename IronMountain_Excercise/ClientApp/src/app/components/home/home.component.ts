@@ -8,13 +8,13 @@ import { Image } from "src/app/models/image.model";
 })
 export class HomeComponent {
     fileData: File[];
+    txtDownloaded: boolean;
     message: string = "Choose Image(s)";
-    buttonFlag: boolean;
-    imagesList: Image[];
+    messageTxt: string = "Upload .meta File";
 
     constructor(private _uploadImagesService: UploadImagesService) { }
 
-    uploadImages(images: any) {
+    UploadImages(images: any) {
         if (images.length === 0) {
             return;
         }
@@ -29,26 +29,34 @@ export class HomeComponent {
 
         this._uploadImagesService.uploadImages(formData).subscribe(res => {
             this.message = "Image(s) Uploaded Successfully";
-            this.buttonFlag = true;
-            this.imagesList = res;
-            console.log(this.imagesList);
+            this.DownloadFile(res);
         }, err => {
             this.message = "Error Uploading Image(s)";
-            this.buttonFlag = false;
         });
     }
 
-    downloadZip() {
-        this._uploadImagesService.downloadZip(this.imagesList).subscribe(res => {
-            const blob = new Blob([res], {
-                type: 'application/zip'
-            });
-            const url = window.URL.createObjectURL(blob);
-            window.open(url);
+    UploadTxt(txtFile: any) {
+        if (txtFile.length === 0) {
+            return;
+        }
 
-            console.log(res);
+        const formData = new FormData();
+
+        formData.append(txtFile.target.files[0].name, txtFile.target.files[0]);
+
+        this._uploadImagesService.processTxt(formData).subscribe(res => {
+            this.messageTxt = "File Readed Successfully";
+            this.DownloadFile(res);
         }, err => {
-            console.log(err);
+            this.messageTxt = "Error Processing File";
         });
+    }
+
+    DownloadFile(res: any) {
+        const element = document.createElement('a');
+        element.href = URL.createObjectURL(res.file);
+        element.download = res.filename;
+        document.body.appendChild(element);
+        element.click();
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.Pkcs;
 using System.Threading.Tasks;
 using IronMountain_Excercise.Data;
 using IronMountain_Excercise.Services;
@@ -27,6 +28,7 @@ namespace IronMountain_Excercise.Controllers
         public IActionResult ProcessImages()
         {
             List<IFormFile> images = new List<IFormFile>();
+
             var files = Request.Form.Files;
             for (int i = 0; i < files.Count; i++)
             {
@@ -39,15 +41,23 @@ namespace IronMountain_Excercise.Controllers
                 return BadRequest();
             }
 
-            var filesList = _processImagesService.ProcessImages(images);
-            return Ok(filesList);
+            var txtFile = _processImagesService.ProcessImages(images);
+            return new FileContentResult(txtFile, new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("application/octet"));
         }
 
-        [HttpPost("download")]
-        public FileContentResult DownloadZip(List<ImageFile> imagesList)
+        [HttpPost("textfile")]
+        public IActionResult ProcessTxt()
         {
-            byte[] zipFile = _processImagesService.DownloadZip(imagesList);
-            return File(zipFile, "application/zip", DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss"));
+            IFormFile file = Request.Form.Files[0];
+
+            if (file == null) return NoContent();
+            if (file.Length == 0)
+            {
+                return BadRequest();
+            }
+
+            var zipFile = _processImagesService.ProcessTxt(file);
+            return new FileContentResult(zipFile, new Microsoft.Net.Http.Headers.MediaTypeHeaderValue("application/octet"));
         }
     }
 }

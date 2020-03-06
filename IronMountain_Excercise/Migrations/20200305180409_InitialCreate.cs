@@ -12,10 +12,11 @@ namespace IronMountain_Excercise.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Identifier = table.Column<int>(nullable: false),
                     CreationDate = table.Column<DateTime>(nullable: false),
-                    FileName = table.Column<string>(nullable: true),
-                    Content = table.Column<string>(nullable: true)
+                    FileName = table.Column<string>(nullable: false),
+                    Content = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {

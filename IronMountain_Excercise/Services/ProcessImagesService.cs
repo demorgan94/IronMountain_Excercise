@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using IronMountain_Excercise.Data;
 using Microsoft.AspNetCore.Hosting;
@@ -15,8 +16,8 @@ namespace IronMountain_Excercise.Services
 {
     public interface IProcessImagesService
     {
-        List<ImageFile> ProcessImages(List<IFormFile> filesData);
-        byte[] DownloadZip(List<ImageFile> imagesIdList);
+        byte[] ProcessImages(List<IFormFile> filesData);
+        byte[] ProcessTxt(IFormFile txtFile);
     }
 
     public class ProcessImagesService : IProcessImagesService
@@ -28,31 +29,38 @@ namespace IronMountain_Excercise.Services
             _context = context;
         }
 
-        public byte[] DownloadZip(List<ImageFile> imagesList)
+        public byte[] ProcessTxt(IFormFile txtFile)
         {
             var formatedDateZipName = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss");
             var uploadFilesPath = DateTime.Now.DayOfWeek.ToString();
-            var txtFileName = new Guid() + "_" + DateTime.Now.ToString("yyyy/MM/dd_hh:mm:ss") + ".txt";
-            byte[] txtBytes = null;
             byte[] zipBytes = null;
+            List<int> imagesIdentifiers = new List<int>();
+
+            var result = new StringBuilder();
+            using (var reader = new StreamReader(txtFile.OpenReadStream()))
+            {
+                reader.ReadLine();
+                while (reader.Peek() >= 0)
+                {
+                    string line;
+                    string[] strArray;
+                    line = reader.ReadLine();
+
+                    strArray = line.Split('|');
+                    int imageId = Convert.ToInt32(strArray[0]);
+
+                    imagesIdentifiers.Add(imageId);
+                }
+            }
 
             using (var stream = new MemoryStream())
             {
-                foreach (var image in imagesList)
+                foreach (var imageId in imagesIdentifiers)
                 {
-                    var result = _context.ImageFiles.FirstOrDefault(x => x.Id == image.Id);
+                    var image = _context.ImageFiles.FirstOrDefault(x => x.Identifier == imageId);
 
                     if (result != null)
                     {
-                        using (var txtStream = new MemoryStream())
-                        {
-                            TextWriter writer = new StreamWriter(txtStream);
-                            writer.WriteLine("\tID\t\t" + "|\tCreation Date\t|" + "\t\t\t\tImage Path\t");
-                            writer.WriteLine($"{image.Id}\t" + $"|{DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")}|" + $"\t{image.FileName}\t");
-                            writer.Flush();
-                            txtBytes = txtStream.ToArray();
-                        }
-
                         using (var zip = new ZipArchive(stream, ZipArchiveMode.Update, true))
                         {
                             var zipEntry = zip.CreateEntry(image.FileName, CompressionLevel.Fastest);
@@ -68,12 +76,14 @@ namespace IronMountain_Excercise.Services
                 zipBytes = stream.ToArray();
             }
 
+            
             return zipBytes;
         }
 
-        public List<ImageFile> ProcessImages(List<IFormFile> filesData)
+        public byte[] ProcessImages(List<IFormFile> filesData)
         {
             List<ImageFile> imagesList = new List<ImageFile>();
+            byte[] txtBytes = null;
 
             foreach (var imageFile in filesData)
             {
@@ -90,20 +100,33 @@ namespace IronMountain_Excercise.Services
 
                     ImageFile image = new ImageFile
                     {
-                        Id = julianDate,
+                        Identifier = julianDate,
                         CreationDate = DateTime.Now,
                         FileName = imageFile.FileName,
                         Content = Convert.ToBase64String(content)
                     };
 
                     imagesList.Add(image);
-
-                    _context.Add(image);
-                    _context.SaveChanges();
                 }
             }
 
-            return imagesList;
+            _context.AddRange(imagesList);
+            _context.SaveChanges();
+
+            using (var txtStream = new MemoryStream())
+            {
+                TextWriter writer = new StreamWriter(txtStream);
+                writer.WriteLine(string.Format("{0}{1}{2}", "    ID   ", "|   Creation Date   |", "   Image Path   "));
+                foreach (var image in imagesList)
+                {
+                    writer.WriteLine(string.Format("{0}{1}{2}", $"{image.Identifier}", $"|{DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss")}|", $"\t{image.FileName}\t"));
+                    writer.Flush();
+                }
+
+                txtBytes = txtStream.ToArray();
+            }
+
+            return txtBytes;
         }
     }
 }

@@ -1,16 +1,24 @@
 <div class="container mt-5">
     <div class="row d-flex justify-content-center">
         <div class="col-md-4">
-            <h1 class="text-center text-info">Image(s) Uploader</h1>
+            <h1 class="text-center text-info">Process Uploader</h1>
             <form class="mt-5">
                 <div class="custom-file">
-                    <input type="file" multiple class="custom-file-input" id="customFile" (change)="uploadImages($event)">
+                    <input type="file" multiple class="custom-file-input" id="customFile" (change)="UploadImages($event)">
                     <label class="custom-file-label text-muted" for="customFile">
                         <span>{{ message }}</span>
                     </label>
                   </div>
             </form>
-            <button class="btn btn-info btn-block mt-2" *ngIf="buttonFlag" (click)="downloadZip()">Download Zip</button>
+
+            <form class="mt-5">
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="customFile" (change)="UploadTxt($event)">
+                <label class="custom-file-label text-muted" for="customFile">
+                  <span>{{ messageTxt }}</span>
+                </label>
+              </div>
+            </form>
         </div>
     </div>
 </div>
