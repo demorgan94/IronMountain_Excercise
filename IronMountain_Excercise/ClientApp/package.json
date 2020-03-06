@@ -1,6 +1,6 @@
 {
   "name": "ironmountain_excercise",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.803.14",
-    "@angular/cli": "8.3.14",
+    "@angular/cli": "8.2.2",
     "@angular/compiler-cli": "8.2.12",
     "@angular/language-service": "8.2.12",
     "@types/jasmine": "~3.4.4",
